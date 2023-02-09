@@ -9,10 +9,10 @@ COPY go.sum ./
 
 RUN go mod download
 
-COPY src/*.go ./
+COPY . ./
 
-RUN go build -o /kvs
+RUN go build -o kvs ./src
 
 EXPOSE 8090
 
-CMD /kvs
+CMD ./kvs
