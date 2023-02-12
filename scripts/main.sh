@@ -10,5 +10,4 @@ docker network rm kvsnet
 docker build -t kvsimg .
 docker network create --subnet=10.10.0.0/16 kvsnet
 
-# Run
-docker run --rm -p 8082:8090 --net=kvsnet --ip=10.10.0.2 --name main-instance kvsimg
+gnome-terminal --tab --title="Alice" -- "./scripts/alice.sh" --tab --title="Bob" -- "./scripts/bob.sh"
