@@ -10,4 +10,4 @@ docker network rm kvsnet
 docker build -t kvsimg .
 docker network create --subnet=10.10.0.0/16 kvsnet
 
-gnome-terminal --tab --title="Alice" -- "./scripts/alice.sh" --tab --title="Bob" -- "./scripts/bob.sh"
+gnome-terminal --tab --title="Alice" -e "./scripts/alice.sh" --tab --title="Bob"  -e "./scripts/bob.sh"

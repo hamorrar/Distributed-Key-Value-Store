@@ -15,7 +15,7 @@ func main() {
 
 	environmentVariable := strings.TrimSpace(os.Getenv("FORWARDING_ADDRESS"))
 	ginRouter := gin.Default()
-	ginRouter.SetTrustedProxies(nil)
+	// ginRouter.SetTrustedProxies(nil)
 
 	router.InitRoutes(ginRouter, KVS, environmentVariable)
 

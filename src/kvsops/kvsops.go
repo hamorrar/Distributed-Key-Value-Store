@@ -7,11 +7,14 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/hamorrar/Distributed-Key-Value-Store/src/kvs"
 )
+
+func NoKey(c *gin.Context) {
+	c.JSON(http.StatusBadRequest, gin.H{"error": "No key specified."})
+}
 
 func PutKey(c *gin.Context) {
 	key := c.Param("key")
@@ -19,41 +22,8 @@ func PutKey(c *gin.Context) {
 
 	// Handles logic for requests that need to be forwarded
 	if environmentVariable != "" {
-		address := "http://" + environmentVariable + "/kvs/" + key
-		fmt.Println(address)
-
-		client := http.Client{Timeout: time.Second * 10}
-
-		req, err := http.NewRequest(http.MethodPut, address, c.Request.Body)
-
-		if err != nil {
-			return
-		}
-
-		req.Header.Set("Content-Type", "application/json")
-
-		// Send the created HTTP request
-		resp, respErr := client.Do(req)
-		if respErr != nil {
-			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Cannot forward request"})
-			return
-		}
-		defer resp.Body.Close()
-
-		// Read the response from the server that received the forwarded request
-		respBodyFromForward, readErr := io.ReadAll(resp.Body)
-		if readErr != nil {
-			return
-		}
-
-		// Create variable to unmarshal the response body into
-		var jsonBodyFromForward map[string]string
-		err2 := json.Unmarshal(respBodyFromForward, &jsonBodyFromForward)
-		if err2 != nil {
-			return
-		}
-
-		c.JSON(resp.StatusCode, jsonBodyFromForward)
+		forwardRequest(c, environmentVariable, http.MethodPut, key)
+		return
 	}
 
 	keyLength := len(key)
@@ -78,28 +48,35 @@ func PutKey(c *gin.Context) {
 		return
 	}
 	_, found := kvs.KVS[key]
+	kvs.KVS[key] = jsonRequestBody["value"]
 	if found {
-		kvs.KVS[key] = jsonRequestBody["value"]
 		c.JSON(http.StatusOK, gin.H{"result": "replaced"})
 	} else {
-		kvs.KVS[key] = jsonRequestBody["value"]
 		c.JSON(http.StatusCreated, gin.H{"result": "created"})
 	}
 
-	fmt.Println(kvs.KVS)
+	fmt.Println("PUT KEY VALUE STORE: ", kvs.KVS)
 
-}
-
-func NoKey(c *gin.Context) {
-	c.JSON(http.StatusBadRequest, gin.H{"error": "No key specified."})
 }
 
 func GetKey(c *gin.Context) {
 	key := c.Param("key")
 	environmentVariable := strings.TrimSpace(os.Getenv("FORWARDING_ADDRESS"))
 	if environmentVariable != "" {
-		address := "http://" + environmentVariable + "/kvs/" + key
-
-		fmt.Println(address)
+		fmt.Println("GET FORWARD")
+		forwardRequest(c, environmentVariable, http.MethodGet, key)
+		return
 	}
+
+	val, found := kvs.KVS[key]
+	if found {
+		fmt.Println("GET FOUND")
+		fmt.Println("GET VALUE: ", val)
+		c.JSON(http.StatusOK, gin.H{"result": "found", "value": val})
+		return
+	} else {
+		fmt.Println("GET NOT FOUND")
+		c.JSON(http.StatusNotFound, gin.H{"error": "Key does not exist"})
+	}
+	fmt.Println("GET KEY VALUE STORE: ", kvs.KVS)
 }
