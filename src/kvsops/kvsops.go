@@ -55,7 +55,7 @@ func PutKey(c *gin.Context) {
 		c.JSON(http.StatusCreated, gin.H{"result": "created"})
 	}
 
-	fmt.Println("PUT KEY VALUE STORE: ", kvs.KVS)
+	fmt.Println("---PUT KEY VALUE STORE: ", kvs.KVS)
 
 }
 
@@ -70,13 +70,11 @@ func GetKey(c *gin.Context) {
 
 	val, found := kvs.KVS[key]
 	if found {
-		fmt.Println("GET FOUND")
-		fmt.Println("GET VALUE: ", val)
+		fmt.Println("GET FOUND. KEY: ", key, "VALUE: ", val)
 		c.JSON(http.StatusOK, gin.H{"result": "found", "value": val})
-		return
 	} else {
 		fmt.Println("GET NOT FOUND")
 		c.JSON(http.StatusNotFound, gin.H{"error": "Key does not exist"})
 	}
-	fmt.Println("GET KEY VALUE STORE: ", kvs.KVS)
+	fmt.Println("---GET KEY VALUE STORE: ", kvs.KVS)
 }

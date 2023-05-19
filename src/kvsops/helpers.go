@@ -38,7 +38,7 @@ func forwardRequest(c *gin.Context, environmentVariable string, method string, k
 	}
 
 	// Create variable to unmarshal the response body into
-	var jsonBodyFromForward map[string]string
+	var jsonBodyFromForward map[string]interface{}
 	err2 := json.Unmarshal(respBodyFromForward, &jsonBodyFromForward)
 	if err2 != nil {
 		return
