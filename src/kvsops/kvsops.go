@@ -58,7 +58,6 @@ func PutKey(c *gin.Context) {
 	}
 
 	fmt.Println("---PUT KEY VALUE STORE: ", kvs.KVS)
-
 }
 
 func GetKey(c *gin.Context) {
@@ -79,4 +78,23 @@ func GetKey(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Key does not exist"})
 	}
 	fmt.Println("---GET KEY VALUE STORE: ", kvs.KVS)
+}
+
+func DeleteKey(c *gin.Context) {
+	key := c.Param("key")
+	environmentVariable := strings.TrimSpace(os.Getenv("FORWARDING_ADDRESS"))
+	if environmentVariable != "" {
+		fmt.Println("DELETE FORWARD")
+		forwardRequest(c, environmentVariable, http.MethodDelete, key)
+		return
+	}
+
+	for k := range kvs.KVS {
+		if k == key {
+			delete(kvs.KVS, k)
+			c.JSON(http.StatusOK, gin.H{"result": "deleted"})
+			return
+		}
+	}
+	c.JSON(http.StatusNotFound, gin.H{"error": "Key does not exist"})
 }

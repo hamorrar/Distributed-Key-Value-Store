@@ -10,6 +10,8 @@ func InitRoutes(router *gin.Engine, KVS map[string]interface{}, environmentVaria
 
 	router.GET("/kvs/:key", kvsops.GetKey)
 
+	router.DELETE("/kvs/:key", kvsops.DeleteKey)
+
 	router.Any("/kvs", kvsops.NoKey)
 	router.Any("/kvs/", kvsops.NoKey)
 }
