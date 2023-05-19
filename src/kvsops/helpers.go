@@ -16,8 +16,8 @@ func forwardRequest(c *gin.Context, environmentVariable string, method string, k
 	client := http.Client{Timeout: time.Second * 10}
 
 	req, err := http.NewRequest(method, address, c.Request.Body)
-
 	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "forwardRequest cannot make new HTTP request"})
 		return
 	}
 
@@ -26,7 +26,7 @@ func forwardRequest(c *gin.Context, environmentVariable string, method string, k
 	// Send the created HTTP request
 	resp, respErr := client.Do(req)
 	if respErr != nil {
-		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Cannot forward request"})
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "forwardRequest cannot forward request"})
 		return
 	}
 	defer resp.Body.Close()
@@ -34,6 +34,7 @@ func forwardRequest(c *gin.Context, environmentVariable string, method string, k
 	// Read the response from the server that received the forwarded request
 	respBodyFromForward, readErr := io.ReadAll(resp.Body)
 	if readErr != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "forwardRequest cannot read response body"})
 		return
 	}
 
@@ -41,6 +42,7 @@ func forwardRequest(c *gin.Context, environmentVariable string, method string, k
 	var jsonBodyFromForward map[string]interface{}
 	err2 := json.Unmarshal(respBodyFromForward, &jsonBodyFromForward)
 	if err2 != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "forwardRequest cannot unmarshal response body from the forwarding instance"})
 		return
 	}
 

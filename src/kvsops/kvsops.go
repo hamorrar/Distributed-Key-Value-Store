@@ -12,6 +12,7 @@ import (
 	"github.com/hamorrar/Distributed-Key-Value-Store/src/kvs"
 )
 
+// Handler for routes without a key specified in URL.
 func NoKey(c *gin.Context) {
 	c.JSON(http.StatusBadRequest, gin.H{"error": "No key specified."})
 }
@@ -35,6 +36,7 @@ func PutKey(c *gin.Context) {
 	var jsonRequestBody map[string]interface{}
 	data, err := io.ReadAll(c.Request.Body)
 	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "PutKey cannot read request body"})
 		return
 	}
 
@@ -44,7 +46,7 @@ func PutKey(c *gin.Context) {
 	}
 	_, isProperRequest := jsonRequestBody["value"]
 	if !isProperRequest {
-		c.JSON(400, gin.H{"error": "PUT request does not specify a value"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "PUT request does not specify a value"})
 		return
 	}
 	_, found := kvs.KVS[key]
