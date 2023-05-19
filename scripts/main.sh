@@ -1,10 +1,9 @@
 #!/bin/bash
 
 # Clean up previous attempt
-y | docker image prune -a
-docker kill $(docker ps -q)
-docker rm $(docker ps -a -q)
-docker network rm kvsnet
+docker kill $(docker ps -a -q)
+echo "y" | docker image prune -a
+echo "y" | docker system prune -a
 
 # Set up
 docker build -t kvsimg .
